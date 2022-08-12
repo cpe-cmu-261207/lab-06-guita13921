@@ -4,10 +4,34 @@ import {
   IconMailForward,
   IconMapPins,
 } from "@tabler/icons";
+import { useState } from "react";
+import axios from "axios";
+import UserCard from "../components/UserCard";
 
 export default function Home() {
+  const [NumberOfUsers, setNumberOfUsers] = useState(1);
+  const [users, setUsers] = useState([]);
+
   const genUsers = async () => {
-    const resp = await axios.get(`https://randomuser.me/api/`);
+    if (NumberOfUsers < 1) {
+      alert("Invalid number of user");
+      return;
+    }
+    const resp = await axios.get(
+      `https://randomuser.me/api/?results=${NumberOfUsers}`
+    );
+
+    const NewUsers = [];
+    for (const x of resp.data.results) {
+      NewUsers.push({
+        name: x.name.first + " " + x.name.last,
+        email: x.email,
+        imgUrl: x.picture.large,
+        address: `${x.location.city} ${x.location.state} ${x.location.country} ${x.location.postcode}`,
+      });
+    }
+
+    setUsers(NewUsers);
   };
 
   return (
@@ -24,55 +48,23 @@ export default function Home() {
           className="form-control text-center"
           style={{ maxWidth: "100px" }}
           type="number"
+          onChange={(event) => {
+            setNumberOfUsers(event.target.value);
+          }}
+          value={NumberOfUsers}
         />
         <button class="btn btn-dark" onClick={() => genUsers()}>
           Generate
         </button>
       </div>
 
-      {/* Example of folded UserCard */}
-      <div className="border-bottom">
-        {/* main section */}
-        <div className="d-flex align-items-center p-3">
-          <img
-            src="/profile-placeholder.jpeg"
-            width="90px"
-            class="rounded-circle me-4"
-          />
-          <span className="text-center display-6 me-auto">Name...</span>
-          <IconChevronDown />
-        </div>
-
-        {/* UserCardDetail is hidden */}
-      </div>
-
-      {/* Example of expanded UserCard */}
-      <div className="border-bottom">
-        {/* main section */}
-        <div className="d-flex align-items-center p-3">
-          <img
-            src="/profile-placeholder.jpeg"
-            width="90px"
-            class="rounded-circle me-4"
-          />
-          <span className="text-center display-6 me-auto">Name...</span>
-          <IconChevronUp />
-        </div>
-
-        {/* UserCardDetail*/}
-        <div className="text-center">
-          <p>
-            <IconMailForward /> Email...
-          </p>
-          <p>
-            <IconMapPins /> Address...
-          </p>
-        </div>
-      </div>
+      {users.map((x) => (
+        <UserCard key={x.name} {...x} />
+      ))}
 
       {/* made by section */}
       <p className="text-center mt-3 text-muted fst-italic">
-        made by Chayanin Suatap 12345679
+        made by Channarong Duangsupa 640612084
       </p>
     </div>
   );
